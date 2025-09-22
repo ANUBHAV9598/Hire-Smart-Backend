@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import { dbConnect } from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
@@ -33,31 +34,11 @@ app.use(cors(corsOptions));
 
 const MODEL_NAME = "gemini-1.5-flash";
 const API_KEY = process.env.API_KEY_G;
-app.set('view engine','ejs');
-app.use(express.static('public'));
 // Middleware to handle HTTP post requests
-app.use(bodyParser.json()); // To handle JSON body
+app.use(bodyParser.json());
 
-let isConnected = false;
-async function connectDB() {
-	try {
-		await mongoose.connect(process.env.MONGO_URI,{
-			useNewUrlParser:true,
-			useUnifiedTopology:true
-		});
-		isConnected = true;
-		console.log('mongodb connected successfully');
-	} catch (error) {
-		console.log('Error in connecting to mongodb', error);
-	}
-}
-
-app.use((req,res,next) =>{
-	if(!isConnected) {
-		connectDB();
-	}
-	next();
-})
+// Ensure DB is connected when module is imported (serverless cold start)
+await dbConnect();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(session({
@@ -162,4 +143,4 @@ app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/notification", notificationRoutes);
 
 
-module.exports = app
+export default app
