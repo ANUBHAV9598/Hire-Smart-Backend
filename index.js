@@ -37,8 +37,7 @@ const API_KEY = process.env.API_KEY_G;
 // Middleware to handle HTTP post requests
 app.use(bodyParser.json());
 
-// Ensure DB is connected when module is imported (serverless cold start)
-await dbConnect();
+// DB connection will be established per-request in the serverless handler
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(session({
@@ -51,6 +50,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+
+// health check
+app.get('/api/v1/health', (req, res) => {
+    res.status(200).json({ ok: true });
+});
 
 async function runChat(userInput) {
 	const genAI = new GoogleGenerativeAI(API_KEY);
@@ -142,5 +146,12 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/notification", notificationRoutes);
 
+
+// error logger
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+});
 
 export default app

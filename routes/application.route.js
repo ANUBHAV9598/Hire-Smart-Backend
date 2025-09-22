@@ -18,6 +18,5 @@ router.route('/rate/:id').post(isAuthenticated, rateApplication);
 router.route('/feedback-to-applicant/:id').post(isAuthenticated, giveFeedbackToApplicant);
 router.route('/feedback-to-applicant/:id').get(giveFeedbackToApplicant);
 
- 
 export default router;
 
