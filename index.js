@@ -3,7 +3,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import connectDB, { isConnected } from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
@@ -38,6 +37,21 @@ app.set('view engine','ejs');
 app.use(express.static('public'));
 // Middleware to handle HTTP post requests
 app.use(bodyParser.json()); // To handle JSON body
+
+let isConnected = false;
+async function connectDB() {
+	try {
+		await mongoose.connect(process.env.MONGO_URI,{
+			useNewUrlParser:true,
+			useUnifiedTopology:true
+		});
+		isConnected = true;
+		console.log('mongodb connected successfully');
+	} catch (error) {
+		console.log('Error in connecting to mongodb', error);
+	}
+}
+
 app.use((req,res,next) =>{
 	if(!isConnected) {
 		connectDB();
